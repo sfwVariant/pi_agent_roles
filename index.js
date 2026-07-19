@@ -27,13 +27,13 @@ const PERMISSION_SETS = {
   force_read: {
     name: 'force_read',
     description: 'Your current permissions are heavily restricted to read-only. Write operations of any kind are prohibited. If a user requests any non-read actions, inform them that your current permission set only allows read actions.',
-    tools: ['read', 'grep', 'ls'],
+    tools: ['read', 'grep', 'find', 'ls'],
     bashWhitelist: [],
   },
   read: {
     name: 'read',
     description: 'Your current permissions are intended for read-only activity. If the user requests any non-read actions, inform them that your current permission set is only intended to allow read actions. Incidental creation of new files (such as by unzipping an archive for read purposes) is acceptable. Destructive uses of commands (i.e. overwriting or deleting existing data) are absolutely prohibited.',
-    tools: ['read', 'grep', 'ls', 'bash'],
+    tools: ['read', 'grep', 'find', 'ls', 'bash'],
     bashWhitelist: [
       // File reading and searching
       'grep',

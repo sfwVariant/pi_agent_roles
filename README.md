@@ -26,12 +26,12 @@ Without an argument, `/role` shows the current role.
 - **Agent Description**: Default tool calls are enabled.
 
 ### `read` (default)
-- **Tools**: read, bash, grep, ls
+- **Tools**: read, bash, grep, find, ls
 - **Bash**: Whitelisted read-only commands (low strictness)
 - **Agent Description**: Your current permissions are intended for read-only activity. If the user requests any non-read actions, inform them that your current permission set is only intended to allow read actions. Incidental creation of new files (such as by unzipping an archive for read purposes) is acceptable. Destructive uses of commands (i.e. overwriting or deleting existing data) are absolutely prohibited.
 
 ### `force_read`
-- **Tools**: read, grep, ls
+- **Tools**: read, grep, find, ls
 - **Bash**: No whitelisted commands
 - **Agent Description**: Your current permissions are heavily restricted to read-only. Write operations of any kind are prohibited. If a user requests any non-read actions, inform them that your current permission set only allows read actions.
 
@@ -54,7 +54,7 @@ To add a new role, add an entry to the `PERMISSION_SETS` object in `index.js`:
 {
   name: 'custom',
   description: 'Custom description for this role.',
-  tools: ['read', 'grep'],  // Tools from Pi's built-in tool set
+  tools: ['read', 'grep', 'find'],  // Tools from Pi's built-in tool set
   bashWhitelist: ['grep', 'cat', 'ls'],  // Array of allowed bash command names
 }
 ```

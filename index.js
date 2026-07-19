@@ -26,13 +26,13 @@ const PERMISSION_SETS = {
   },
   force_read: {
     name: 'force_read',
-    description: 'Your current permissions are heavily restricted to read-only. Write operations of any kind are prohibited. If a user requests any non-read actions, or any tool calls that are not whitelisted, inform them that your current permission set only allows read actions, then stop and wait for further instructions.',
+    description: 'The current role permissions are heavily restricted to read-only tools. Write operations of any kind are prohibited. If the user requests any non-whitelisted actions, inform them that the current permissions are too restrictive then wait for further instructions. The user can whitelist all behaviour using the `/role free` command.',
     tools: ['read', 'grep', 'find', 'ls'],
     bashWhitelist: [],
   },
   read: {
     name: 'read',
-    description: 'Your current permissions are intended for read-only activity. If the user requests any non-read actions, or any tool calls/commands that are not whitelisted, inform them that your current permission set is only intended to allow read actions, then stop and wait for further instructions. Incidental creation of new files (such as by unzipping an archive for read purposes) is acceptable. Destructive uses of commands (i.e. overwriting or deleting existing data) are absolutely prohibited.',
+    description: 'The current role permissions are intended for read-only behaviour. Incidental creation of new files (such as unzipping an archive for read purposes) is acceptable. Destructive uses of commands (i.e. modifying, overwriting or deleting existing data) are absolutely prohibited. If the user requests any tasks that would normally utilise non-whitelisted commands, inform them that the current permissions are too restrictive then wait for further instructions. Instead of creatively bypassing the whitelist (such as by using `echo`), simply stop and ask the user to change the current role. The user can whitelist all behaviour using the `/role free` command.',
     tools: ['read', 'grep', 'find', 'ls', 'bash'],
     bashWhitelist: [
       // File reading and searching
@@ -160,7 +160,7 @@ function extensionFactory(pi) {
     if (!isWhitelisted) {
       return {
         block: true,
-        reason: `Bash command '${commandName}' is not in the current permission set's whitelist.\n\nAllowed bash commands: ${bashWhitelist.join(', ')}\n\nCurrent role: ${currentRole}`,
+        reason: `Bash command '${commandName}' is not in the current agent role whitelist.\n\nAllowed bash commands: ${bashWhitelist.join(', ')}\n\nCurrent role: ${currentRole}.\n\nThe user probably left a read-only role active by accident. I should tell the user to activate the \`free\` role for this task.`,
       };
     }
   });

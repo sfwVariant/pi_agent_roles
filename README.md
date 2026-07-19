@@ -28,12 +28,12 @@ Without an argument, `/role` shows the current role.
 ### `read` (default)
 - **Tools**: read, bash, grep, find, ls
 - **Bash**: Whitelisted read-only commands (low strictness)
-- **Agent Description**: Your current permissions are intended for read-only activity. If the user requests any non-read actions, inform them that your current permission set is only intended to allow read actions. Incidental creation of new files (such as by unzipping an archive for read purposes) is acceptable. Destructive uses of commands (i.e. overwriting or deleting existing data) are absolutely prohibited.
+- **Agent Description**: The current role permissions are intended for read-only behaviour. Incidental creation of new files (such as unzipping an archive for read purposes) is acceptable. Destructive uses of commands (i.e. modifying, overwriting or deleting existing data) are absolutely prohibited. If the user requests any tasks that would normally utilise non-whitelisted commands, inform them that the current permissions are too restrictive then wait for further instructions. Instead of creatively bypassing the whitelist (such as by using `echo`), simply stop and ask the user to change the current role. The user can whitelist all behaviour using the `/role free` command.
 
 ### `force_read`
 - **Tools**: read, grep, find, ls
 - **Bash**: No whitelisted commands
-- **Agent Description**: Your current permissions are heavily restricted to read-only. Write operations of any kind are prohibited. If a user requests any non-read actions, inform them that your current permission set only allows read actions.
+- **Agent Description**: The current role permissions are heavily restricted to read-only tools. Write operations of any kind are prohibited. If the user requests any non-whitelisted actions, inform them that the current permissions are too restrictive then wait for further instructions. The user can whitelist all behaviour using the `/role free` command.
 
 ## Bash Command Enforcement
 

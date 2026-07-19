@@ -30,9 +30,11 @@ Without an argument, `/role` shows the current role.
 The extension enforces bash command permissions by intercepting bash tool calls:
 
 1. If a role has no bash whitelist (like `free`), all bash commands are allowed.
-2. If a role has a bash whitelist (like `read`), only commands starting with a whitelisted command name are allowed.
-3. Commands are matched by their base name (e.g., `/usr/bin/grep` matches `grep`).
-4. When a command is blocked, the agent receives a message explaining which commands are allowed.
+2. If a role has a bash whitelist (like `read`), only commands whose base name appears in the whitelist are allowed.
+3. Commands are matched by their base name (e.g., `/usr/bin/grep` matches `grep`; `./script.sh` matches `script.sh`).
+4. When a command is blocked, the agent receives a message listing all allowed commands.
+
+> **Note:** Bash enforcement is not strict enough for reliable access control. An agent can easily bypass the whitelist by constructing commands that produce output through a whitelisted command, such as piping an unlisted command's output through `grep`. For example, `unlisted_cmd 2>&1 | grep ''` runs `unlisted_cmd` even though only `grep` is whitelisted.
 
 ## Adding New Roles
 
@@ -47,45 +49,33 @@ To add a new role, add an entry to the `PERMISSION_SETS` object in `index.js`:
 }
 ```
 
-## Read Role - Suggested Bash Commands
+## Bash Commands Available in the `read` Role
 
-The `read` role includes the following bash commands (approved for review):
+The following commands are whitelisted for the `read` role:
 
 ### File Content Readers
-- grep, cat, head, tail, less, more, view
-
-### File Info/Stats
-- stat, du, file, wc
-
-### Directory Listing
-- ls, dir
+- `cat`, `head`, `tail`
 
 ### File Search
-- find, locate, which
+- `find`, `grep`
+
+### File Metadata
+- `stat`, `du`, `file`, `wc`
+
+### Directory and Path Inspection
+- `ls`, `pwd`, `dirname`, `basename`, `readlink`, `realpath`, `which`
 
 ### Text Processing
-- sort, uniq, cut, tr, awk, sed, paste, join, comm, diff, patch
+- `sort`, `uniq`, `cut`, `tr`, `awk`, `sed`, `paste`, `join`, `comm`, `diff`, `nl`
 
-### Shell Utilities
-- echo, printf, env, export, test, true, false, xargs, tee, pipe
+### Shell/Data Utilities
+- `echo`, `printf`, `env`, `test`
 
-### Path Utilities
-- dirname, basename, readlink, realpath
+### System Inspection
+- `date`, `uname`, `whoami`, `id`, `ps`
 
-### System Info
-- pwd, date, cal, uptime, uname, whoami, id, ps
-
-### Numeric/Sequence
-- seq, yes, od, hexdump, xxd, strings
-
-### Compression (read-only)
-- zcat, bzcat, xzcat, gunzip, bunzip2, unxz, tar, zip, unzip, 7z, rar
-
-### Other Useful Read Commands
-- nl, fmt, fold, rev, tac, expand, unexpand, column, pr, split
-
-### File Operations (read/create)
-- rsync, cp, mv, ln, mkdir, rmdir, rm, touch
+### Archive Inspection and Extraction
+- `zcat`, `bzcat`, `xzcat`, `tar`, `unzip`, `7z`
 
 ## How It Works
 

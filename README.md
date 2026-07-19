@@ -4,7 +4,11 @@ This extension allows you to switch between permission sets (roles) that define 
 
 The whitelist is enforced, but the default `read` role whitelist is too broad to actually prevent write operations; agents can still easily perform write operations by creatively using the available commands. Low-intelligence agents are more likely to bypass the role this way. Do not use the `read` role as a security layer.
 
-The `force_read` role is significantly more restrictive and does not provide any write-capable tools. However, agents can still perform write actions if another extension is installed that provides alternative write mechanisms - and there are likely other ways the role can be compromised too. At best it can be used as a **low-strength** security layer.
+The `force_read` role is significantly more restrictive and does not provide any write-capable tools. However, agents can still perform write actions if another extension is installed that provides alternative write mechanisms *or* overwrites the available tool calls from this extension - and there are likely other ways the role can be compromised too. At best it can be used as a **low-strength** security layer.
+
+## New tools added by extensions are blocked by default
+
+If you have another extension which adds more tools (using Pi's built in tool system), they will need to be added to one or more of the roles in this extension in order to be used.
 
 ## Usage
 

@@ -2,18 +2,18 @@
 
 This extension allows you to switch between permission sets (roles) that define which tools and bash commands are available to the agent. The agent is informed of what tools are whitelisted, and is also told the *intention* of the role to encourage it to conform.
 
-The whitelist is enforced, but the pre-provided *read* role whitelist is too broad to actually prevent write operations; the agent can still easily perform destructive write operations using the available commands. Do not use it as a security layer.
+The whitelist is enforced, but the default `read` role whitelist is too broad to actually prevent write operations; agents can still easily perform write operations by creatively using the available commands. Low-intelligence agents are more likely to bypass the role this way. Do not use the `read` role as a security layer.
 
-The force_read role is significantly more restrictive, but agents can still perform write actions if another extension is installed that provides additional tools - and there are likely other ways to bypass it too. It can be used as a **low-strength** security layer.
+The `force_read` role is significantly more restrictive and does not provide any write-capable tools. However, agents can still perform write actions if another extension is installed that provides alternative write mechanisms - and there are likely other ways the role can be compromised too. At best it can be used as a **low-strength** security layer.
 
 ## Usage
 
 Switch to a role using the `/role` command:
 
 ```
-/role free       # No restrictions, normal Pi functionality
-/role read       # Non-restrictive read-only, allows general read tools and bash commands (default)
-/role force_read # Restrictive read-only, does not allow any bash tool calls
+/role free        # No restrictions, normal Pi functionality
+/role read        # Non-restrictive read-only, allows general read tools and bash commands (default)
+/role force_read  # Restrictive read-only, does not allow any bash tool calls
 ```
 
 Without an argument, `/role` shows the current role.

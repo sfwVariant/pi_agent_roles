@@ -20,19 +20,19 @@
 const PERMISSION_SETS = {
   free: {
     name: 'free',
-    description: 'Default tool calls are enabled.',
+    description: 'The free permission set is active.',
     tools: ['read', 'bash', 'edit', 'write', 'grep', 'find', 'ls'],
     bashWhitelist: null, // null means no restriction
   },
   force_read: {
     name: 'force_read',
-    description: 'The current role permissions are heavily restricted to read-only tools. Write operations of any kind are prohibited. If the user requests any non-whitelisted actions, inform them that the current permissions are too restrictive then wait for further instructions. The user can whitelist all behaviour using the `/role free` command.',
+    description: 'The current permission set is heavily restricted to read-only tools. Write operations of any kind are prohibited. If the user requests any non-whitelisted actions, inform them that the current permissions are too restrictive then wait for further instructions. The user can permit all behaviour by switching to the `free` permission set.',
     tools: ['read', 'grep', 'find', 'ls'],
     bashWhitelist: [],
   },
   read: {
     name: 'read',
-    description: 'The current role permissions are intended for read-only behaviour. Incidental creation of new files (such as unzipping an archive for read purposes) is acceptable. Destructive uses of commands (i.e. modifying, overwriting or deleting existing data) are absolutely prohibited. If the user requests any tasks that would normally utilise non-whitelisted commands, inform them that the current permissions are too restrictive then wait for further instructions. Instead of creatively bypassing the whitelist (such as by using `echo`), simply stop and ask the user to change the current role. The user can whitelist all behaviour using the `/role free` command.',
+    description: 'The current permission set is intended for read-only behaviour. Incidental creation of new files (such as unzipping an archive for read purposes) is acceptable. Destructive uses of commands (i.e. modifying, overwriting or deleting existing data) are absolutely prohibited. If the user requests any tasks that would normally utilise non-whitelisted commands, inform them that the current permissions are not suitable then wait for further instructions. Instead of creatively bypassing the whitelist (such as by using `echo`), simply stop and ask the user to change the current permission set. The user can permit all by switching to the `free` permission set.',
     tools: ['read', 'grep', 'find', 'ls', 'bash'],
     bashWhitelist: [
       // File reading and searching
@@ -105,6 +105,14 @@ let currentRole = 'read';
 // ============================================================================
 
 function extensionFactory(pi) {
+  // Register a message renderer for role switch alerts
+  pi.registerMessageRenderer('permission-switch', (message, options, theme) => {
+    const { Text } = require('@earendil-works/pi-tui');
+    let text = theme.fg('accent', '[Permission Switch] ');
+    text += message.content;
+    return new Text(text, options.outputPad, 0);
+  });
+
   // Register the /role command
   pi.registerCommand('role', {
     description: 'Switch to a different permission set',
@@ -112,7 +120,7 @@ function extensionFactory(pi) {
       const roleName = args.trim().toLowerCase();
       
       if (!roleName) {
-        ctx.ui.notify(`Current role: ${currentRole}`, 'info');
+        ctx.ui.notify(`Current permission set: ${currentRole}`, 'info');
         return;
       }
       
@@ -120,14 +128,22 @@ function extensionFactory(pi) {
       
       if (!permissionSet) {
         const available = Object.keys(PERMISSION_SETS).join(', ');
-        ctx.ui.notify(`Unknown role: ${roleName}. Available roles: ${available}`, 'error');
+        ctx.ui.notify(`Unknown permission set: ${roleName}. Available sets: ${available}`, 'error');
         return;
       }
       
       // Apply the new role
       applyRole(pi, roleName);
       
-      ctx.ui.notify(`Switched to role: ${roleName}`, 'info');
+      const switchMessage = `Switched to permission set: ${roleName}`;
+      ctx.ui.notify(`Current permission set: ${roleName}`, 'info');
+      
+      // Add to chat context so the agent receives it
+      pi.sendMessage({
+        customType: 'permission-switch',
+        content: switchMessage,
+        display: true,
+      });
     },
   });
 
@@ -160,7 +176,7 @@ function extensionFactory(pi) {
     if (!isWhitelisted) {
       return {
         block: true,
-        reason: `Bash command '${commandName}' is not in the current agent role whitelist.\n\nAllowed bash commands: ${bashWhitelist.join(', ')}\n\nCurrent role: ${currentRole}.\n\nThe user probably left a read-only role active by accident. I should tell the user to activate the \`free\` role for this task.`,
+        reason: `Bash command '${commandName}' is not in the current agent permission whitelist.\n\nAllowed bash commands: ${bashWhitelist.join(', ')}\n\nCurrent permission set: ${currentRole}.\n\nThe user probably left a read-only permission set active by accident. I should tell the user to activate the \`free\` permissions for this task.`,
       };
     }
   });
@@ -174,7 +190,7 @@ function extensionFactory(pi) {
     }
     
     // Build the role context string to inject into system prompt
-    let roleContext = `\n---\n\n[Current Role: ${role.name}]\nDescription: ${role.description}`;
+    let roleContext = `\n---\n\n[Current Permission Set: ${role.name}]\nDescription: ${role.description}`;
     
     // Add bash whitelist if it exists
     if (role.bashWhitelist && role.bashWhitelist.length > 0) {
@@ -194,9 +210,9 @@ function extensionFactory(pi) {
       // Re-apply current role
       applyRole(pi, currentRole);
       
-      // Inform the user of the current role (notification only, not sent to agent)
+      // Inform the user of the current role
       const role = PERMISSION_SETS[currentRole];
-      ctx.ui.notify(`Current role: ${role.name}`, 'info');
+      ctx.ui.notify(`Current permission set: ${role.name}`, 'info');
     }
   });
 }

@@ -1,6 +1,6 @@
 # Role-Based Permission Sets for Pi
 
-This extension allows you to switch between permission sets (roles) that define which tools and bash commands are available to the agent. The agent is informed of what tools are whitelisted, and is also told the *intention* of the role to encourage it to conform.
+This extension allows you to switch between permission sets (roles) that define which tools and bash commands are available to the agent. The agent is informed of what tools are whitelisted, and is also told the *intention* of the role to encourage it to conform. Roles are referred to as "permission sets" to the agent, and the agent is able to discuss them when active.
 
 The whitelist is enforced, but the default `read` role whitelist is too broad to actually prevent write operations; agents can still easily perform write operations by creatively using the available commands. Low-intelligence agents are more likely to bypass the role this way. Do not use the `read` role as a security layer.
 

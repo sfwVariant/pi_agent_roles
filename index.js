@@ -189,6 +189,11 @@ function extensionFactory(pi) {
       return;
     }
     
+    // Defense-in-depth: re-assert the active tools so they can never drift
+    // from the permission set advertised in the system prompt. Idempotent:
+    // this just re-sets the same tools the role already declares.
+    pi.setActiveTools(role.tools || []);
+    
     // Build the role context string to inject into system prompt
     let roleContext = `\n---\n\n[Current Permission Set: ${role.name}]\nDescription: ${role.description}`;
     
@@ -204,16 +209,18 @@ function extensionFactory(pi) {
     return { systemPrompt: event.systemPrompt };
   });
 
-  // Update active tools when session starts (initial load or reload)
+  // Update active tools when session starts (startup, reload, new, resume, fork)
   pi.on('session_start', (event, ctx) => {
-    if (event.reason === 'reload' || event.reason === 'startup') {
-      // Re-apply current role
-      applyRole(pi, currentRole);
-      
-      // Inform the user of the current role
-      const role = PERMISSION_SETS[currentRole];
-      ctx.ui.notify(`Current permission set: ${role.name}`, 'info');
-    }
+    // Re-apply current role on EVERY session start. Every runtime (re)build
+    // resets active tools to the default set (read, bash, edit, write), so
+    // the role must be re-asserted for all reasons: startup, reload, new,
+    // resume, and fork. Without this, /new, resume/import, and /fork leave
+    // write/edit active even under a read-only role.
+    applyRole(pi, currentRole);
+    
+    // Inform the user of the current role
+    const role = PERMISSION_SETS[currentRole];
+    ctx.ui.notify(`Current permission set: ${role.name}`, 'info');
   });
 }
 
